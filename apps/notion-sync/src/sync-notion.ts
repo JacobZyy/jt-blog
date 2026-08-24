@@ -1,13 +1,15 @@
 import type { Post, PostsPayload } from '@jt-blog/content'
 import { createHash, randomUUID } from 'node:crypto'
+import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve } from 'node:path'
 import process from 'node:process'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { CONTENT_DATA_DIR } from '@jt-blog/content/node'
 
 export const NOTION_VERSION = '2026-03-11'
 export const DEFAULT_OUTPUT_DIR = CONTENT_DATA_DIR
+export const DEFAULT_ENV_FILE = fileURLToPath(new URL('../.env', import.meta.url))
 
 export const DEFAULT_PROPERTY_NAMES = {
   title: 'Title',
@@ -523,6 +525,10 @@ async function main(): Promise<void> {
     process.stdout.write(`Synced ${snapshot.posts.length} fixture posts to ${resolve(outputDir ?? DEFAULT_OUTPUT_DIR)}\n`)
     return
   }
+
+  const envFile = process.env.NOTION_SYNC_ENV_FILE ?? DEFAULT_ENV_FILE
+  if (existsSync(envFile))
+    process.loadEnvFile(envFile)
 
   const token = process.env.NOTION_TOKEN
   const dataSourceId = process.env.NOTION_DATA_SOURCE_ID

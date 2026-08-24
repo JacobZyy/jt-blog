@@ -8,7 +8,7 @@ export function Home(props: { posts: Post[], loading: boolean, error: string }) 
   return (
     <div class="site-container page-stack">
       <section class="home-hero">
-        <img class="hero-mark" src="/jt.svg" alt="JT monogram" width="128" height="128" />
+        <img class="hero-mark" src="/jt-animated.svg" alt="JT monogram" width="128" height="128" />
         <div class="hero-copy">
           <p class="eyebrow">{siteConfig.eyebrow}</p>
           <h1>{siteConfig.name}</h1>

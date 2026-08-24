@@ -9,6 +9,7 @@
     "check-types": "turbo run check-types",
     "content:sync": "turbo run sync --filter=@jt-blog/notion-sync",
     "content:sync:mock": "turbo run sync:mock --filter=@jt-blog/notion-sync",
+    "content:schedule:install": "turbo run schedule:install --filter=@jt-blog/notion-sync",
     "dev": "turbo run dev --filter=@jt-blog/blog",
     "lint": "turbo run lint",
     "prepare": "simple-git-hooks",

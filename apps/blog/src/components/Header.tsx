@@ -11,7 +11,7 @@ export function Header(props: HeaderProps) {
     <header class="site-header">
       <div class="site-container site-header-inner">
         <a class="brand-link focus-ring" href="/" aria-label="Go to home">
-          <img class="brand-mark" src="/jt.svg" alt="JT monogram" width="36" height="36" />
+          <img class="brand-mark" src="/jt-animated.svg" alt="JT monogram" width="36" height="36" />
           <span>{siteConfig.name}</span>
         </a>
         <nav class="site-nav" aria-label="Primary navigation">

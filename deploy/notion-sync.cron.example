@@ -1,5 +1,4 @@
 # Asia/Shanghai: every day at 10:00.
-# Keep NOTION_TOKEN and NOTION_DATA_SOURCE_ID in a root-readable environment
-# file outside the repository.
+# `pnpm content:schedule:install` creates this entry automatically.
 CRON_TZ=Asia/Shanghai
-0 10 * * * cd /path/to/jt-blog && ( . /path/to/jt-blog.env && pnpm run content:sync ) >> /var/log/jt-blog-notion-sync.log 2>&1
+0 10 * * * cd /path/to/jt-blog && NOTION_SYNC_ENV_FILE='/path/to/jt-blog.env' '/absolute/path/to/pnpm' content:sync >> /path/to/jt-blog/logs/notion-sync.log 2>&1

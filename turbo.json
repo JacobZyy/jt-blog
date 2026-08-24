@@ -19,6 +19,10 @@
       "cache": false,
       "persistent": true
     },
+    "schedule:install": {
+      "cache": false,
+      "env": ["NOTION_SYNC_ENV_FILE"]
+    },
     "sync": {
       "cache": false,
       "env": [
@@ -28,6 +32,7 @@
         "NOTION_PUBLISHED_VALUE",
         "NOTION_SLUG_PROPERTY",
         "NOTION_STATUS_PROPERTY",
+        "NOTION_SYNC_ENV_FILE",
         "NOTION_TAGS_PROPERTY",
         "NOTION_TITLE_PROPERTY",
         "NOTION_TOKEN"

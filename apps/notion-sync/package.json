@@ -4,9 +4,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "schedule:install": "tsx src/install-cron.ts",
     "sync": "tsx src/sync-notion.ts",
     "sync:mock": "tsx src/sync-notion.ts --fixture src/fixtures/notion-posts.json",
-    "test": "tsx --test src/sync-notion.test.ts",
+    "test": "tsx --test src/*.test.ts",
     "lint": "eslint src",
     "check-types": "tsc --noEmit"
   },
