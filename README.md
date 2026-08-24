@@ -33,6 +33,8 @@ Set these values in `apps/notion-sync/.env`:
 ```dotenv
 NOTION_TOKEN=secret_...
 NOTION_DATA_SOURCE_ID=...
+# Production only:
+# NOTION_SYNC_OUTPUT_DIR=/srv/jt-blog/content
 ```
 
 The default Notion properties are `Title`, `Slug`, `Description`, `Published`, `Tags`, and `Status`. Optional environment variables in the example override these names.

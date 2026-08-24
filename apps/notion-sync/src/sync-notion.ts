@@ -517,12 +517,12 @@ async function main(): Promise<void> {
   const fixtureIndex = args.indexOf('--fixture')
   const outputIndex = args.indexOf('--output')
   const fixturePath = fixtureIndex >= 0 ? args[fixtureIndex + 1] : undefined
-  const outputDir = outputIndex >= 0 ? args[outputIndex + 1] : undefined
+  const outputArgument = outputIndex >= 0 ? args[outputIndex + 1] : undefined
 
   if (fixturePath) {
     const fixture = await loadFixture(resolve(fixturePath))
-    const snapshot = await syncSnapshot(new FixtureSource(fixture), { outputDir })
-    process.stdout.write(`Synced ${snapshot.posts.length} fixture posts to ${resolve(outputDir ?? DEFAULT_OUTPUT_DIR)}\n`)
+    const snapshot = await syncSnapshot(new FixtureSource(fixture), { outputDir: outputArgument })
+    process.stdout.write(`Synced ${snapshot.posts.length} fixture posts to ${resolve(outputArgument ?? DEFAULT_OUTPUT_DIR)}\n`)
     return
   }
 
@@ -530,6 +530,7 @@ async function main(): Promise<void> {
   if (existsSync(envFile))
     process.loadEnvFile(envFile)
 
+  const outputDir = outputArgument ?? process.env.NOTION_SYNC_OUTPUT_DIR
   const token = process.env.NOTION_TOKEN
   const dataSourceId = process.env.NOTION_DATA_SOURCE_ID
   if (!token)
