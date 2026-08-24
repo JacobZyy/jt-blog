@@ -1,0 +1,5 @@
+# Asia/Shanghai: every day at 10:00.
+# Keep NOTION_TOKEN and NOTION_DATA_SOURCE_ID in a root-readable environment
+# file outside the repository.
+CRON_TZ=Asia/Shanghai
+0 10 * * * cd /path/to/jt-blog && ( . /path/to/jt-blog.env && pnpm run content:sync ) >> /var/log/jt-blog-notion-sync.log 2>&1

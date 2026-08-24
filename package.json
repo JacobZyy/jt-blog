@@ -3,31 +3,28 @@
   "type": "module",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
-    "dev": "vp dev",
-    "build": "tsc -b && vp build",
-    "preview": "vp preview",
-    "prepare": "simple-git-hooks"
-  },
-  "dependencies": {
-    "@solidjs/web": "catalog:",
-    "solid-js": "catalog:"
+    "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "content:sync": "turbo run sync --filter=@jt-blog/notion-sync",
+    "content:sync:mock": "turbo run sync:mock --filter=@jt-blog/notion-sync",
+    "dev": "turbo run dev --filter=@jt-blog/blog",
+    "lint": "turbo run lint",
+    "prepare": "simple-git-hooks",
+    "preview": "turbo run preview --filter=@jt-blog/blog",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
-    "@solidjs/vite-plugin": "catalog:",
-    "@types/node": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-format": "catalog:",
     "eslint-plugin-solid": "catalog:",
     "lint-staged": "catalog:",
     "simple-git-hooks": "catalog:",
-    "tsx": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "vite-plus": "catalog:"
+    "turbo": "catalog:"
   },
   "devEngines": {
     "packageManager": {

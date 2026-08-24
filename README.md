@@ -1,28 +1,53 @@
-## Usage
+# jt-blog
 
-```bash
-$ npm install # or pnpm install or yarn install
+Personal blog monorepo built with Solid 2, Vite+, Tailwind CSS v4, Preline, pnpm, and Turborepo.
+
+```text
+apps/blog            Solid frontend
+apps/notion-sync     Scheduled Notion sync
+packages/content     Shared contract, post snapshot, and media
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+## Setup
 
-## Available Scripts
+```bash
+pnpm install
+pnpm dev
+```
 
-In the project directory, you can run:
+The site reads `/content/posts.json`. During development, Vite serves this path from `packages/content/data`. In production, Nginx serves the same directory directly.
 
-### `npm run dev`
+The committed snapshot contains mock posts, so local development does not require Notion credentials. Site text, projects, GitHub, RSS, and social links live in `apps/blog/src/config/site.ts`. Empty URLs are not rendered.
 
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
+## Notion sync
 
-### `npm run build`
+Use `apps/notion-sync/.env.example` as the template for a protected environment file outside the repository, then set:
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
+```bash
+NOTION_TOKEN=secret_...
+NOTION_DATA_SOURCE_ID=...
+```
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+The default Notion properties are `Title`, `Slug`, `Description`, `Published`, `Tags`, and `Status`. Optional environment variables in the example override these names.
 
-## Deployment
+Run a live or fixture sync:
 
-Learn more about deploying your application with the [documentations](https://vite.dev/guide/static-deploy.html)
+```bash
+pnpm content:sync
+pnpm content:sync:mock
+```
+
+The sync downloads Notion images, rewrites their URLs, and replaces `packages/content/data` only after every post succeeds. A failed sync leaves the previous snapshot intact.
+
+## Schedule and deploy
+
+`deploy/notion-sync.cron.example` runs the sync at 10:00 Asia/Shanghai. It does not rebuild the frontend. `deploy/nginx.conf.example` serves the content package directly and provides the SPA route fallback.
+
+## Verify
+
+```bash
+pnpm lint
+pnpm check-types
+pnpm test
+pnpm build
+```

@@ -1,0 +1,32 @@
+{
+  "name": "@jt-blog/blog",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vp dev",
+    "build": "tsc -b && vp build",
+    "preview": "vp preview",
+    "lint": "eslint src vite.config.ts",
+    "check-types": "tsc -b"
+  },
+  "dependencies": {
+    "@jt-blog/content": "workspace:*",
+    "@solidjs/web": "catalog:",
+    "markdown-it": "catalog:",
+    "preline": "catalog:",
+    "shiki": "catalog:",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@types/markdown-it": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

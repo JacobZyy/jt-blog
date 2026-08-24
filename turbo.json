@@ -1,0 +1,44 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "node_modules/.tmp/*.tsbuildinfo"]
+    },
+    "check-types": {
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "outputs": []
+    },
+    "preview": {
+      "cache": false,
+      "persistent": true
+    },
+    "sync": {
+      "cache": false,
+      "env": [
+        "NOTION_DATA_SOURCE_ID",
+        "NOTION_DESCRIPTION_PROPERTY",
+        "NOTION_PUBLISHED_PROPERTY",
+        "NOTION_PUBLISHED_VALUE",
+        "NOTION_SLUG_PROPERTY",
+        "NOTION_STATUS_PROPERTY",
+        "NOTION_TAGS_PROPERTY",
+        "NOTION_TITLE_PROPERTY",
+        "NOTION_TOKEN"
+      ]
+    },
+    "sync:mock": {
+      "cache": false
+    },
+    "test": {
+      "dependsOn": ["check-types"],
+      "outputs": []
+    }
+  }
+}

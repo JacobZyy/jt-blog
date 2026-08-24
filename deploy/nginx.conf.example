@@ -1,0 +1,15 @@
+server {
+  listen 80;
+  server_name blog.example.com;
+  root /path/to/jt-blog/apps/blog/dist;
+
+  location /content/ {
+    alias /path/to/jt-blog/packages/content/data/;
+    add_header Cache-Control "no-cache";
+    autoindex off;
+  }
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}

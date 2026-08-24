@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-08-24T00:00:00.000Z",
+  "posts": [
+    {
+      "id": "jt-post-solid-2",
+      "slug": "solid-2-personal-blog",
+      "title": "Building a Calm Personal Blog with Solid 2",
+      "description": "A small, durable foundation for a personal blog.",
+      "publishedAt": "2026-08-18",
+      "updatedAt": "2026-08-20T08:00:00.000Z",
+      "tags": [
+        "Solid",
+        "Architecture"
+      ],
+      "readingMinutes": 1,
+      "markdown": "# Building a Calm Personal Blog with Solid 2\n\nA personal site should stay small enough to understand in one sitting.\n\n## Why this stack\n\nSolid keeps the UI direct while a scheduled Notion snapshot keeps credentials and content work off the browser.\n\n<callout icon=\"🌿\" color=\"green_bg\">\nThe deployed site reads static content. A failed sync leaves the previous snapshot untouched.\n</callout>\n\n```ts\nconst source = 'notion'\nconst renderer = 'solid'\n```\n\n- Content sync runs on the server.\n- Tailwind owns design tokens.\n- Preline consumes the same theme."
+    },
+    {
+      "id": "jt-post-tailwind-tokens",
+      "slug": "tailwind-v4-design-tokens",
+      "title": "Design Tokens with Tailwind CSS v4",
+      "description": "Turning a visual system into a practical code theme.",
+      "publishedAt": "2026-08-12",
+      "updatedAt": "2026-08-14T08:00:00.000Z",
+      "tags": [
+        "Design System",
+        "CSS"
+      ],
+      "readingMinutes": 1,
+      "markdown": "# Design Tokens with Tailwind CSS v4\n\nOne theme keeps design and code aligned."
+    },
+    {
+      "id": "jt-post-notion-content",
+      "slug": "notion-publishing-workflow",
+      "title": "Notion as a Quiet Publishing Workflow",
+      "description": "Why a scheduled snapshot keeps a personal site simple.",
+      "publishedAt": "2026-08-06",
+      "updatedAt": "2026-08-09T08:00:00.000Z",
+      "tags": [
+        "Notion",
+        "Workflow"
+      ],
+      "readingMinutes": 1,
+      "markdown": "# Notion as a Quiet Publishing Workflow\n\nA scheduled snapshot keeps the runtime simple."
+    }
+  ]
+}
