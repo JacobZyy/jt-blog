@@ -1,26 +1,31 @@
 {
   "name": "jt-blog",
+  "type": "module",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "vp dev",
     "build": "tsc -b && vp build",
-    "preview": "vp preview"
+    "preview": "vp preview",
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@solidjs/web": "2.0.0-rc.0",
-    "solid-js": "2.0.0-rc.0"
+    "@solidjs/web": "catalog:",
+    "solid-js": "catalog:"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.3.0",
-    "@solidjs/vite-plugin": "3.0.0-next.28",
-    "@types/node": "^24.13.3",
-    "eslint": "^10.8.0",
-    "eslint-plugin-format": "^2.0.1",
-    "eslint-plugin-solid": "^0.14.5",
-    "tsx": "^4.23.12",
-    "typescript": "~6.0.2",
+    "@antfu/eslint-config": "catalog:",
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@solidjs/vite-plugin": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-format": "catalog:",
+    "eslint-plugin-solid": "catalog:",
+    "lint-staged": "catalog:",
+    "simple-git-hooks": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
@@ -30,5 +35,17 @@
       "version": "11.22.0",
       "onFail": "download"
     }
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged",
+    "commit-msg": "pnpm exec commitlint --edit \"$1\""
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --fix"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }

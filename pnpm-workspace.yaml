@@ -1,12 +1,28 @@
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true
+  simple-git-hooks: false
+catalogMode: strict
+overrides:
+  vite: 'catalog:'
 catalog:
+  '@antfu/eslint-config': ^9.3.0
+  '@commitlint/cli': ^21.2.2
+  '@commitlint/config-conventional': ^21.2.2
+  '@solidjs/vite-plugin': 3.0.0-next.28
+  '@solidjs/web': 2.0.0-rc.0
+  '@types/node': ^24.13.3
+  eslint: ^10.8.0
+  eslint-plugin-format: ^2.0.1
+  eslint-plugin-solid: ^0.14.5
+  lint-staged: ^17.3.0
+  simple-git-hooks: ^2.13.1
+  solid-js: 2.0.0-rc.0
+  tsx: ^4.23.12
+  typescript: ~6.0.2
   vite: npm:@voidzero-dev/vite-plus-core@0.2.9
   vite-plus: 0.2.9
-overrides:
-  vite: "catalog:"
 peerDependencyRules:
   allowAny:
     - vite
   allowedVersions:
-    vite: "*"
+    vite: '*'
