@@ -4,6 +4,7 @@ import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { siteConfig } from './config/site'
 import { loadPosts } from './lib/content'
+import { postSlug, routeTitle } from './lib/title'
 import { Home } from './pages/Home'
 import { PostDetail } from './pages/PostDetail'
 import { Posts } from './pages/Posts'
@@ -13,15 +14,6 @@ type Theme = 'light' | 'dark'
 function currentPath() {
   const path = window.location.pathname.replace(/\/+$/, '')
   return path || '/'
-}
-
-function postSlug(path: string) {
-  try {
-    return decodeURIComponent(path.slice('/posts/'.length))
-  }
-  catch {
-    return ''
-  }
 }
 
 function preferredTheme(): Theme {
@@ -75,6 +67,10 @@ function App() {
     catch {
       // Storage can be unavailable in private browsing contexts.
     }
+  })
+
+  createEffect(() => routeTitle(path(), posts(), loading()), (nextTitle) => {
+    document.title = nextTitle
   })
 
   const handlePopState = () => setPath(currentPath())
