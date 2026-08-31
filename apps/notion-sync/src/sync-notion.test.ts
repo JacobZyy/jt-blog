@@ -1,7 +1,7 @@
 /* eslint-disable test/no-import-node-test */
 import type { NotionPage } from './sync-notion.ts'
 import { strict as assert } from 'node:assert'
-import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
@@ -53,18 +53,30 @@ test('maps Notion properties and creates stable slug', () => {
   assert.equal(estimateReadingMinutes('你好'.repeat(500)), 2)
 })
 
-test('downloads Markdown images and rewrites signed URLs', async () => {
+test('downloads Notion images and keeps public URLs remote', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'jt-blog-media-'))
   try {
-    const fetcher: typeof fetch = async () => new Response('image', {
-      status: 200,
-      headers: { 'content-type': 'image/png' },
-    })
-    const markdown = '![cover](https://files.notion.so/signed/cover?expires=tomorrow)'
+    let requestCount = 0
+    const fetcher: typeof fetch = async () => {
+      requestCount++
+      return new Response('image', {
+        status: 200,
+        headers: { 'content-type': 'image/png' },
+      })
+    }
+    const markdown = [
+      '![cover](https://files.notion.so/signed/cover?expires=tomorrow)',
+      '![asset](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/page/image.png?X-Amz-Expires=3600)',
+      '![diagram](https://raw.githubusercontent.com/example/blog/main/diagram.png)',
+    ].join('\n')
     const rewritten = await rewriteMarkdownImages(markdown, directory, 'hello-world', fetcher)
-    assert.match(rewritten, /^!\[cover\]\(\/content\/media\/hello-world\/[a-f0-9]{16}\.png\)$/)
-    const [fileName] = await readdir(join(directory, 'hello-world'))
-    assert.equal((await readFile(join(directory, 'hello-world', fileName))).length, 5)
+    assert.match(rewritten, /^!\[cover\]\(\/content\/media\/hello-world\/[a-f0-9]{16}\.png\)/)
+    assert.match(rewritten, /!\[diagram\]\(https:\/\/raw\.githubusercontent\.com\/example\/blog\/main\/diagram\.png\)$/)
+    assert.equal(requestCount, 2)
+    const files = await readdir(join(directory, 'hello-world'))
+    assert.equal(files.length, 2)
+    for (const fileName of files)
+      assert.equal((await readFile(join(directory, 'hello-world', fileName))).length, 5)
   }
   finally {
     await rm(directory, { recursive: true, force: true })
@@ -81,6 +93,7 @@ test('failed sync keeps previous snapshot', async () => {
       listPages: async () => [],
       getMarkdown: async () => '',
     }, { outputDir })
+    assert.equal((await stat(outputDir)).mode & 0o777, 0o755)
     await writeFile(join(outputDir, 'posts.json'), oldSnapshot)
     await assert.rejects(() => syncSnapshot({
       listPages: async () => { throw new Error('network down') },

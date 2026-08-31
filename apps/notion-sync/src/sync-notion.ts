@@ -1,7 +1,7 @@
 import type { Post, PostsPayload } from '@jt-blog/content'
 import { createHash, randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
-import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -294,7 +294,7 @@ export async function rewriteMarkdownImages(
   for (const match of markdown.matchAll(pattern)) {
     const destination = match[1]
     const url = destination.startsWith('<') ? destination.slice(1, -1) : destination
-    if (!isDownloadableUrl(url))
+    if (!isNotionImageUrl(url))
       continue
 
     const localUrl = seen.get(url) ?? await downloadMedia(url, mediaDir, slug, fetcher)
@@ -333,6 +333,7 @@ export async function syncSnapshot(source: SyncSource, options: SyncOptions = {}
   const tempDir = await mkdtemp(join(dirname(outputDir), '.content-snapshot-'))
 
   try {
+    await chmod(tempDir, 0o755)
     await mkdir(join(tempDir, 'media'), { recursive: true })
     const pages = (await source.listPages()).filter(page => isPublished(page, config))
     const slugs = new Set<string>()
@@ -462,12 +463,16 @@ function isMissingPath(error: unknown): boolean {
   return isRecord(error) && error.code === 'ENOENT'
 }
 
-function isDownloadableUrl(value: string): boolean {
-  if (value.startsWith('/'))
-    return false
+function isNotionImageUrl(value: string): boolean {
   try {
-    const protocol = new URL(value).protocol
-    return protocol === 'http:' || protocol === 'https:' || protocol === 'data:'
+    const { hostname, pathname } = new URL(value)
+    return (
+      hostname === 'file.notion.so' ||
+      hostname === 'files.notion.so' ||
+      hostname.endsWith('.notion-static.com') ||
+      (hostname === 's3.us-west-2.amazonaws.com' && pathname.startsWith('/secure.notion-static.com/')) ||
+      (hostname.startsWith('prod-files-secure.') && hostname.endsWith('.amazonaws.com'))
+    )
   }
   catch {
     return false
