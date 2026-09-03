@@ -12,9 +12,15 @@
     "check-types": "tsc -b"
   },
   "dependencies": {
+    "@automann/maple-mono-cn": "catalog:",
     "@jt-blog/content": "workspace:*",
+    "@mdit/plugin-katex": "catalog:",
+    "@mdit/plugin-tasklist": "catalog:",
     "@solidjs/web": "catalog:",
+    "katex": "catalog:",
     "markdown-it": "catalog:",
+    "markdown-it-cjk-friendly": "catalog:",
+    "mermaid": "catalog:",
     "preline": "catalog:",
     "shiki": "catalog:",
     "solid-js": "catalog:"
@@ -22,6 +28,7 @@
   "devDependencies": {
     "@solidjs/vite-plugin": "catalog:",
     "@tailwindcss/vite": "catalog:",
+    "@tailwindcss/typography": "catalog:",
     "@types/markdown-it": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",

@@ -11,6 +11,7 @@ import {
   estimateReadingMinutes,
   mapPageMetadata,
   mergeConfig,
+  NotionClient,
   rewriteMarkdownImages,
   slugify,
   syncSnapshot,
@@ -51,6 +52,78 @@ test('maps Notion properties and creates stable slug', () => {
   })
   assert.equal(slugify('  Catppuccin / Solid 2  '), 'catppuccin-solid-2')
   assert.equal(estimateReadingMinutes('你好'.repeat(500)), 2)
+})
+
+test('uses Notion Blocks API and falls back to a select status filter', async () => {
+  const requests: Array<{ body: Record<string, unknown>, url: string }> = []
+  const fetcher: typeof fetch = async (input, init) => {
+    const url = String(input)
+    const body = init?.body ? JSON.parse(String(init.body)) as Record<string, unknown> : {}
+    requests.push({ body, url })
+
+    if (url.includes('/data_sources/') && 'status' in (body.filter as Record<string, unknown> ?? {})) {
+      return Response.json({
+        code: 'validation_error',
+        message: 'Status property is a select',
+        object: 'error',
+        status: 400,
+      }, { status: 400 })
+    }
+
+    if (url.includes('/data_sources/')) {
+      return Response.json({
+        has_more: false,
+        next_cursor: null,
+        object: 'list',
+        results: [{ id: 'page-1', object: 'page', properties: {}, url: 'https://notion.so/page-1' }],
+        type: 'page_or_data_source',
+      })
+    }
+
+    return Response.json({
+      block: {},
+      has_more: false,
+      next_cursor: null,
+      object: 'list',
+      results: [{
+        archived: false,
+        created_by: { id: 'user-1', object: 'user' },
+        created_time: '2026-09-03T00:00:00.000Z',
+        has_children: false,
+        id: 'block-1',
+        in_trash: false,
+        last_edited_by: { id: 'user-1', object: 'user' },
+        last_edited_time: '2026-09-03T00:00:00.000Z',
+        object: 'block',
+        paragraph: {
+          color: 'default',
+          rich_text: [{
+            annotations: { bold: true, code: false, color: 'default', italic: false, strikethrough: false, underline: false },
+            href: null,
+            plain_text: 'Converted from blocks',
+            text: { content: 'Converted from blocks', link: null },
+            type: 'text',
+          }],
+        },
+        parent: { page_id: 'page-1', type: 'page_id' },
+        type: 'paragraph',
+      }],
+      type: 'block',
+    })
+  }
+  const source = new NotionClient({
+    baseUrl: 'https://notion.test',
+    dataSourceId: 'source-1',
+    fetcher,
+    token: 'secret_test',
+  })
+
+  assert.deepEqual((await source.listPages()).map(page => page.id), ['page-1'])
+  assert.equal(await source.getMarkdown('page-1'), '**Converted from blocks**')
+  assert.equal(requests.length, 3)
+  assert.ok(requests[0].url.endsWith('/v1/data_sources/source-1/query'))
+  assert.deepEqual(requests[1].body.filter, { property: 'Status', select: { equals: 'Published' } })
+  assert.match(requests[2].url, /\/v1\/blocks\/page-1\/children/)
 })
 
 test('downloads Notion images and keeps public URLs remote', async () => {

@@ -11,9 +11,11 @@ catalog:
   '@antfu/eslint-config': ^9.3.0
   '@commitlint/cli': ^21.2.2
   '@commitlint/config-conventional': ^21.2.2
+  '@automann/maple-mono-cn': 7.9.2
   '@solidjs/vite-plugin': 3.0.0-next.28
   '@solidjs/web': 2.0.0-rc.0
   '@tailwindcss/vite': 4.3.3
+  '@tailwindcss/typography': 0.5.20
   '@types/markdown-it': 14.2.0
   '@types/node': ^24.13.3
   eslint: ^10.8.0
@@ -21,6 +23,7 @@ catalog:
   eslint-plugin-solid: ^0.14.5
   lint-staged: ^17.3.0
   markdown-it: 15.0.0
+  markdown-it-cjk-friendly: 3.0.0
   preline: 4.2.0
   shiki: 4.4.3
   simple-git-hooks: ^2.13.1
@@ -31,8 +34,12 @@ catalog:
   typescript: ~6.0.2
   vite: npm:@voidzero-dev/vite-plus-core@0.2.9
   vite-plus: 0.2.9
-  '@eslint-react/eslint-plugin': ^5.18.7
-  eslint-plugin-react-refresh: ^0.5.5
+  '@notionhq/client': 5.26.0
+  notion-to-md: 3.1.9
+  '@mdit/plugin-tasklist': 1.1.0
+  '@mdit/plugin-katex': 1.1.0
+  katex: 0.18.5
+  mermaid: 11.17.2
 peerDependencyRules:
   allowAny:
     - vite

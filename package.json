@@ -20,11 +20,9 @@
     "@antfu/eslint-config": "catalog:",
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
-    "@eslint-react/eslint-plugin": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-format": "catalog:",
-    "eslint-plugin-solid": "catalog:", 
-    "eslint-plugin-react-refresh": "catalog:",
+    "eslint-plugin-solid": "catalog:",
     "lint-staged": "catalog:",
     "simple-git-hooks": "catalog:",
     "turbo": "catalog:"

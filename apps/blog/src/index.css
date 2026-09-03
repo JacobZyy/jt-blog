@@ -1,4 +1,6 @@
+@import '@automann/maple-mono-cn/regular.css';
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
 
 /* Preline v4 variant hooks. Components consume the same Tailwind theme vars. */
 @source "../node_modules/preline/dist/*.js";
@@ -20,6 +22,7 @@
   --color-jt-brand-soft: var(--jt-source-brand-soft);
   --color-jt-code: var(--jt-source-code);
   --color-jt-focus: var(--jt-source-focus);
+  --font-jt-code: 'Maple Mono NF CN', 'Maple Mono CN', ui-monospace, SFMono-Regular, Consolas, monospace;
   --radius-jt-sm: var(--jt-source-radius-sm);
   --radius-jt-md: var(--jt-source-radius-md);
   --radius-jt-lg: var(--jt-source-radius-lg);
@@ -39,6 +42,27 @@
   --ease-jt-exit: cubic-bezier(0.4, 0, 1, 1);
   --ease-jt-linear: linear;
   --animate-jt-fade-in: jt-fade-in var(--duration-jt-emphasis) var(--ease-jt-enter) both;
+}
+
+@utility prose-jt {
+  --tw-prose-body: var(--color-jt-text-secondary);
+  --tw-prose-headings: var(--color-jt-text-primary);
+  --tw-prose-lead: var(--color-jt-text-secondary);
+  --tw-prose-links: var(--color-jt-brand-strong);
+  --tw-prose-bold: var(--color-jt-text-primary);
+  --tw-prose-counters: var(--color-jt-text-muted);
+  --tw-prose-bullets: var(--color-jt-brand);
+  --tw-prose-hr: var(--color-jt-border);
+  --tw-prose-quotes: var(--color-jt-text-primary);
+  --tw-prose-quote-borders: var(--color-jt-brand);
+  --tw-prose-captions: var(--color-jt-text-muted);
+  --tw-prose-kbd: var(--color-jt-text-primary);
+  --tw-prose-kbd-shadows: color-mix(in oklab, var(--color-jt-text-primary) 12%, transparent);
+  --tw-prose-code: var(--color-jt-text-primary);
+  --tw-prose-pre-code: var(--color-jt-text-primary);
+  --tw-prose-pre-bg: var(--color-jt-code);
+  --tw-prose-th-borders: var(--color-jt-border);
+  --tw-prose-td-borders: var(--color-jt-border);
 }
 
 :root {
@@ -295,37 +319,39 @@ a {
   text-transform: uppercase;
 }
 
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
+@layer base {
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
 
-h1,
-h2,
-h3 {
-  color: var(--color-jt-text-primary, var(--jt-source-text-primary));
-}
+  h1,
+  h2,
+  h3 {
+    color: var(--color-jt-text-primary, var(--jt-source-text-primary));
+  }
 
-h1 {
-  font-size: clamp(34px, 5vw, 48px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.08;
-}
+  h1 {
+    font-size: clamp(34px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
 
-h2 {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
 
-h3 {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.5;
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
 }
 
 .hero-description,
@@ -499,6 +525,11 @@ h3 {
   gap: 16px;
 }
 
+.article-header,
+.back-link {
+  margin-left: 212px;
+}
+
 .article-header h1 {
   max-width: 760px;
 }
@@ -512,58 +543,101 @@ h3 {
   width: fit-content;
 }
 
-.markdown-body {
+.article-document {
   display: grid;
-  max-width: 720px;
-  gap: 20px;
-  font-size: 16px;
-  line-height: 1.6;
+  grid-template-columns: 180px minmax(0, 720px);
+  align-items: start;
+  gap: 32px;
 }
 
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4 {
-  margin-top: 20px;
+.article-toc {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100svh - 48px);
+  overflow-y: auto;
+  padding-block: 4px 8px;
+  scrollbar-color: var(--color-jt-border, var(--jt-source-border)) transparent;
+  scrollbar-width: thin;
+}
+
+.article-toc-title {
+  margin-bottom: 12px;
   color: var(--color-jt-text-primary, var(--jt-source-text-primary));
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.markdown-body h1 {
-  font-size: 32px;
-}
-.markdown-body h2 {
-  font-size: 24px;
-}
-.markdown-body h3 {
-  font-size: 20px;
-}
-.markdown-body h4 {
-  font-size: 18px;
-}
-
-.markdown-body a {
-  color: var(--color-jt-brand, var(--jt-source-brand));
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.markdown-body ul,
-.markdown-body ol {
-  display: grid;
-  gap: 8px;
+.article-toc ul {
   margin: 0;
-  padding-left: 24px;
+  border-left: 1px solid var(--color-jt-border, var(--jt-source-border));
+  padding: 0;
+  list-style: none;
+}
+
+.article-toc-link {
+  display: block;
+  overflow: hidden;
+  border-left: 2px solid transparent;
+  padding: 5px 8px 5px 12px;
+  color: var(--color-jt-text-muted, var(--jt-source-text-muted));
+  font-size: 12px;
+  line-height: 1.45;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  transition:
+    color var(--duration-jt-fast) var(--ease-jt-standard),
+    border-color var(--duration-jt-fast) var(--ease-jt-standard);
+  white-space: nowrap;
+}
+
+.article-toc li[data-level='2'] .article-toc-link {
+  padding-left: 20px;
+}
+
+.article-toc li[data-level='3'] .article-toc-link {
+  padding-left: 28px;
+}
+
+.article-toc-link:hover,
+.article-toc-link.is-active {
+  color: var(--color-jt-brand-strong, var(--jt-source-brand-strong));
+}
+
+.article-toc-link.is-active {
+  border-left-color: var(--color-jt-brand, var(--jt-source-brand));
+  font-weight: 600;
+}
+
+.markdown-body {
+  max-width: 720px;
+}
+
+.markdown-body :is(h1, h2, h3) {
+  scroll-margin-top: 24px;
+}
+
+.markdown-body .task-list-container {
+  list-style: none;
+  padding-left: 0;
+}
+
+.markdown-body .task-list-item-checkbox {
+  margin: 0 8px 0 0;
+  accent-color: var(--color-jt-brand, var(--jt-source-brand));
 }
 
 .markdown-body blockquote {
-  display: grid;
-  gap: 12px;
-  margin: 0;
   border-left: 3px solid var(--color-jt-brand, var(--jt-source-brand));
   padding-left: 20px;
-  color: var(--color-jt-text-primary, var(--jt-source-text-primary));
-  font-size: 22px;
-  line-height: 1.45;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.markdown-body blockquote p:first-of-type::before,
+.markdown-body blockquote p:last-of-type::after,
+.markdown-body code::before,
+.markdown-body code::after {
+  content: none;
 }
 
 .markdown-body code {
@@ -571,13 +645,13 @@ h3 {
   padding: 2px 5px;
   color: var(--color-jt-text-primary, var(--jt-source-text-primary));
   background: var(--color-jt-code, var(--jt-source-code));
-  font-family: 'Fira Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: var(--font-jt-code);
   font-size: 0.9em;
+  font-variant-ligatures: contextual;
 }
 
 .markdown-body pre {
   width: 100%;
-  overflow-x: auto;
   border-radius: var(--radius-jt-md, 8px);
   padding: 20px;
   background: var(--color-jt-code, var(--jt-source-code));
@@ -586,7 +660,9 @@ h3 {
 .markdown-body pre code {
   padding: 0;
   background: transparent;
+  font-family: var(--font-jt-code);
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.7;
 }
 
@@ -604,12 +680,6 @@ h3 {
   color: var(--shiki-dark) !important;
 }
 
-.markdown-body table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
 .markdown-body details {
   border: 1px solid var(--color-jt-border, var(--jt-source-border));
   border-radius: var(--radius-jt-md, 8px);
@@ -623,59 +693,19 @@ h3 {
   font-weight: 600;
 }
 
-.markdown-body th,
-.markdown-body td {
-  border-bottom: 1px solid var(--color-jt-border, var(--jt-source-border));
-  padding: 10px 12px;
+.markdown-body .katex-display,
+.markdown-body .mermaid {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.markdown-body th {
-  color: var(--color-jt-text-primary, var(--jt-source-text-primary));
-  font-weight: 600;
+.markdown-body .mermaid {
+  text-align: center;
 }
 
-.notion-callout {
-  display: grid;
-  gap: 8px;
-  border: 1px solid var(--color-jt-border, var(--jt-source-border));
-  border-left: 3px solid var(--color-jt-brand, var(--jt-source-brand));
-  border-radius: var(--radius-jt-md, 8px);
-  padding: 16px;
-  background: var(--color-jt-surface, var(--jt-source-surface));
-}
-
-.notion-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.notion-column {
-  display: grid;
-  gap: 12px;
-}
-
-.notion-page,
-.notion-file,
-.notion-mention-user {
-  display: inline-flex;
-  width: fit-content;
-  border-radius: 4px;
-  padding: 2px 6px;
-  color: var(--color-jt-brand-strong, var(--jt-source-brand-strong));
-  background: var(--color-jt-brand-soft, var(--jt-source-brand-soft));
-}
-
-.notion-synced-block {
-  border: 1px dashed var(--color-jt-border, var(--jt-source-border));
-  border-radius: var(--radius-jt-md, 8px);
-  padding: 16px;
-}
-
-.notion-unknown-tag {
-  color: var(--color-jt-text-muted, var(--jt-source-text-muted));
-  font-family: 'Fira Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 0.85em;
+.markdown-body .mermaid svg {
+  max-width: 100%;
+  height: auto;
 }
 
 .empty-state,
@@ -727,6 +757,21 @@ h3 {
   white-space: nowrap;
 }
 
+@media (max-width: 960px) {
+  .article-header,
+  .back-link {
+    margin-left: 0;
+  }
+
+  .article-document {
+    display: block;
+  }
+
+  .article-toc {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .site-container {
     width: min(100% - 32px, 960px);
@@ -772,10 +817,6 @@ h3 {
 
   .post-row-link {
     align-items: flex-start;
-  }
-
-  .notion-columns {
-    grid-template-columns: 1fr;
   }
 }
 

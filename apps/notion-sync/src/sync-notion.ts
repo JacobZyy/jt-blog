@@ -6,6 +6,8 @@ import { dirname, extname, join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { CONTENT_DATA_DIR } from '@jt-blog/content/node'
+import { APIErrorCode, Client, isFullPage, isNotionClientError } from '@notionhq/client'
+import { NotionToMarkdown } from 'notion-to-md'
 
 export const NOTION_VERSION = '2026-03-11'
 export const DEFAULT_OUTPUT_DIR = CONTENT_DATA_DIR
@@ -38,15 +40,9 @@ export interface NotionPage {
 
 export type NotionProperty = Record<string, unknown>
 
-export interface MarkdownResponse {
-  markdown: string
-  truncated?: boolean
-  unknown_block_ids?: string[]
-}
-
 export interface SyncSource {
   listPages: () => Promise<NotionPage[]>
-  getMarkdown: (pageId: string) => Promise<string | MarkdownResponse>
+  getMarkdown: (pageId: string) => Promise<string>
 }
 
 export interface SyncConfig {
@@ -68,16 +64,6 @@ const DEFAULT_CONFIG: SyncConfig = {
   publishedValue: 'Published',
 }
 
-class NotionRequestError extends Error {
-  constructor(
-    readonly status: number,
-    message: string,
-  ) {
-    super(message)
-    this.name = 'NotionRequestError'
-  }
-}
-
 interface NotionClientOptions {
   token: string
   dataSourceId: string
@@ -88,14 +74,23 @@ interface NotionClientOptions {
 }
 
 export class NotionClient implements SyncSource {
-  private readonly baseUrl: string
-  private readonly fetcher: typeof fetch
+  private readonly client: Client
+  private readonly converter: NotionToMarkdown
   private readonly propertyNames: PropertyNames
   private readonly publishedValue: string
 
   constructor(private readonly options: NotionClientOptions) {
-    this.baseUrl = (options.baseUrl ?? 'https://api.notion.com').replace(/\/$/, '')
-    this.fetcher = options.fetcher ?? fetch
+    this.client = new Client({
+      auth: options.token,
+      baseUrl: options.baseUrl,
+      fetch: options.fetcher,
+      notionVersion: NOTION_VERSION,
+      timeoutMs: 30_000,
+    })
+    this.converter = new NotionToMarkdown({
+      notionClient: this.client,
+      config: { parseChildPages: false },
+    })
     this.propertyNames = { ...DEFAULT_PROPERTY_NAMES, ...options.propertyNames }
     this.publishedValue = options.publishedValue ?? 'Published'
   }
@@ -105,17 +100,16 @@ export class NotionClient implements SyncSource {
       return await this.queryPages('status')
     }
     catch (error) {
-      if (error instanceof NotionRequestError && [400, 422].includes(error.status)) {
+      if (isNotionClientError(error) && error.code === APIErrorCode.ValidationError) {
         return this.queryPages('select')
       }
       throw error
     }
   }
 
-  async getMarkdown(pageId: string): Promise<MarkdownResponse> {
-    return this.request<MarkdownResponse>(`/v1/pages/${encodeURIComponent(pageId)}/markdown`, {
-      method: 'GET',
-    })
+  async getMarkdown(pageId: string): Promise<string> {
+    const blocks = await this.converter.pageToMarkdown(pageId)
+    return this.converter.toMarkdownString(blocks).parent.trim()
   }
 
   private async queryPages(filterType: 'status' | 'select'): Promise<NotionPage[]> {
@@ -123,27 +117,18 @@ export class NotionClient implements SyncSource {
     let startCursor: string | undefined
 
     do {
-      const body: Record<string, unknown> = {
+      const filter = filterType === 'status'
+        ? { property: this.propertyNames.status, status: { equals: this.publishedValue } } as const
+        : { property: this.propertyNames.status, select: { equals: this.publishedValue } } as const
+      const response = await this.client.dataSources.query({
+        data_source_id: this.options.dataSourceId,
+        filter,
         page_size: 100,
-        filter: {
-          property: this.propertyNames.status,
-          [filterType]: { equals: this.publishedValue },
-        },
-      }
-      if (startCursor)
-        body.start_cursor = startCursor
-
-      const response = await this.request<{
-        results?: unknown[]
-        has_more?: boolean
-        next_cursor?: string | null
-      }>(`/v1/data_sources/${encodeURIComponent(this.options.dataSourceId)}/query`, {
-        method: 'POST',
-        body: JSON.stringify(body),
+        start_cursor: startCursor,
       })
 
-      for (const result of response.results ?? []) {
-        if (isNotionPage(result))
+      for (const result of response.results) {
+        if (isFullPage(result))
           pages.push(result)
       }
 
@@ -151,40 +136,6 @@ export class NotionClient implements SyncSource {
     } while (startCursor)
 
     return pages
-  }
-
-  private async request<T>(path: string, init: RequestInit): Promise<T> {
-    const response = await this.fetcher(`${this.baseUrl}${path}`, {
-      ...init,
-      headers: {
-        'Authorization': `Bearer ${this.options.token}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': NOTION_VERSION,
-        ...init.headers,
-      },
-      signal: init.signal ?? AbortSignal.timeout(30_000),
-    })
-    const body = await response.text()
-
-    if (!response.ok) {
-      let message = body.slice(0, 300)
-      try {
-        const parsed = JSON.parse(body) as { message?: unknown }
-        if (typeof parsed.message === 'string')
-          message = parsed.message
-      }
-      catch {
-        // Keep response text when Notion does not return JSON.
-      }
-      throw new NotionRequestError(response.status, `Notion request failed (${response.status}): ${message}`)
-    }
-
-    try {
-      return JSON.parse(body) as T
-    }
-    catch (error) {
-      throw new Error(`Notion returned invalid JSON: ${error instanceof Error ? error.message : String(error)}`)
-    }
   }
 }
 
@@ -345,7 +296,7 @@ export async function syncSnapshot(source: SyncSource, options: SyncOptions = {}
         throw new Error(`Duplicate post slug: ${metadata.slug}`)
       slugs.add(metadata.slug)
 
-      const markdown = normalizeMarkdown(await source.getMarkdown(page.id))
+      const markdown = await source.getMarkdown(page.id)
       const rewrittenMarkdown = await rewriteMarkdownImages(markdown, join(tempDir, 'media'), metadata.slug)
       posts.push({
         ...metadata,
@@ -375,7 +326,7 @@ export class FixtureSource implements SyncSource {
     return this.fixture.pages
   }
 
-  async getMarkdown(pageId: string): Promise<string | MarkdownResponse> {
+  async getMarkdown(pageId: string): Promise<string> {
     const markdown = this.fixture.markdown[pageId]
     if (typeof markdown !== 'string')
       throw new Error(`Fixture has no markdown for page ${pageId}`)
@@ -394,18 +345,6 @@ async function loadFixture(filePath: string): Promise<FixtureFile> {
     throw new Error(`Invalid fixture: ${filePath}`)
   }
   return { pages: value.pages, markdown: value.markdown as Record<string, string> }
-}
-
-function normalizeMarkdown(value: string | MarkdownResponse): string {
-  if (typeof value === 'string')
-    return value
-  if (value.truncated)
-    throw new Error('Notion markdown is truncated')
-  if ((value.unknown_block_ids?.length ?? 0) > 0)
-    throw new Error('Notion markdown contains unknown blocks')
-  if (typeof value.markdown !== 'string')
-    throw new Error('Notion markdown response has no markdown')
-  return value.markdown
 }
 
 async function replaceDirectory(sourceDir: string, targetDir: string): Promise<void> {
@@ -467,11 +406,11 @@ function isNotionImageUrl(value: string): boolean {
   try {
     const { hostname, pathname } = new URL(value)
     return (
-      hostname === 'file.notion.so' ||
-      hostname === 'files.notion.so' ||
-      hostname.endsWith('.notion-static.com') ||
-      (hostname === 's3.us-west-2.amazonaws.com' && pathname.startsWith('/secure.notion-static.com/')) ||
-      (hostname.startsWith('prod-files-secure.') && hostname.endsWith('.amazonaws.com'))
+      hostname === 'file.notion.so'
+      || hostname === 'files.notion.so'
+      || hostname.endsWith('.notion-static.com')
+      || (hostname === 's3.us-west-2.amazonaws.com' && pathname.startsWith('/secure.notion-static.com/'))
+      || (hostname.startsWith('prod-files-secure.') && hostname.endsWith('.amazonaws.com'))
     )
   }
   catch {
