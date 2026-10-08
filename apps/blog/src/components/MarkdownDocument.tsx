@@ -24,6 +24,7 @@ export function MarkdownDocument(props: { source: string }) {
   const [activeHeading, setActiveHeading] = createSignal('')
   const [headings, setHeadings] = createSignal<TableOfContentsItem[]>([])
   const [markup, setMarkup] = createSignal('')
+  const [highlighting, setHighlighting] = createSignal(true)
   let headingElements: HTMLHeadingElement[] = []
   let root!: HTMLDivElement
   let scrollFrame = 0
@@ -48,14 +49,17 @@ export function MarkdownDocument(props: { source: string }) {
 
   createEffect(() => props.source, (source) => {
     const request = ++renderRequest
+    setHighlighting(true)
     setMarkup(renderMarkdown(source))
     void renderMarkdownWithShiki(source).then((value) => {
-      if (request === renderRequest)
+      if (request === renderRequest) {
         setMarkup(value)
+        setHighlighting(false)
+      }
     })
   })
 
-  createEffect(() => markup(), () => {
+  createEffect(() => [markup(), highlighting()] as const, ([, isHighlighting]) => {
     headingElements = [...root.querySelectorAll<HTMLHeadingElement>('h1, h2, h3')]
     const nextHeadings = headingElements.flatMap((heading, index) => {
       const title = heading.textContent?.trim()
@@ -75,7 +79,7 @@ export function MarkdownDocument(props: { source: string }) {
     })
 
     const nodes = [...root.querySelectorAll<HTMLElement>('.mermaid:not([data-processed])')]
-    if (nodes.length > 0)
+    if (!isHighlighting && nodes.length > 0)
       renderMermaid(nodes)
   })
 
