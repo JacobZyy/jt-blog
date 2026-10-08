@@ -2,7 +2,7 @@
 import { strict as assert } from 'node:assert'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { renderMarkdown } from '../src/lib/markdown.ts'
+import { renderMarkdown, renderMarkdownWithShiki } from '../src/lib/markdown.ts'
 
 test('renders standard lists and GFM tables without Notion repairs', () => {
   const source = [
@@ -55,6 +55,22 @@ test('keeps code literals intact', () => {
 
   assert.match(markup, /<code class="language-javascript">console\.log\(&quot;\*\*literal\*\*&quot;\)\n<\/code>/)
   assert.doesNotMatch(markup, /<strong>literal<\/strong>/)
+})
+
+test('highlights fenced code with both themes and loads additional languages on later renders', async () => {
+  const shell = await renderMarkdownWithShiki('~~~shell\ncurl --version\n~~~')
+  assert.match(shell, /class="shiki shiki-themes/)
+  assert.match(shell, /<span style="color:#[A-Fa-f0-9]{6};/)
+  assert.match(shell, /--shiki-dark:#[A-Fa-f0-9]{6}/)
+
+  const source = '```ts\nconst count: number = 42\n```\n\n```json\n{"enabled": true}\n```\n\n```unknown\n<script>literal</script>\n```'
+  const markup = await renderMarkdownWithShiki(source)
+  assert.equal(markup.match(/class="shiki shiki-themes/g)?.length, 2)
+  assert.match(markup, /<code class="language-unknown">&lt;script&gt;literal&lt;\/script&gt;/)
+
+  const plain = await renderMarkdownWithShiki('```plain text\nhello\n```\n\n```mermaid\ngraph LR\nA --> B\n```')
+  assert.doesNotMatch(plain, /class="shiki/)
+  assert.match(plain, /<div class="mermaid">/)
 })
 
 test('renders the proxy article with separate sections and native tables', () => {

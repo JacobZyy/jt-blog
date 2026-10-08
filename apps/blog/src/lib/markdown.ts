@@ -26,8 +26,11 @@ const languageAliases: Record<string, string> = {
 
 let highlighterPromise: Promise<HighlighterCore> | undefined
 
-function getHighlighter() {
-  return highlighterPromise ??= import('./shiki').then(module => module.createBlogHighlighter())
+async function getHighlighter(languages: string[]) {
+  const module = await import('./shiki.ts')
+  const highlighter = await (highlighterPromise ??= module.createBlogHighlighter())
+  await module.loadBlogLanguages(highlighter, languages)
+  return highlighter
 }
 
 function normalizeLanguage(language: string) {
@@ -86,7 +89,16 @@ export function renderMarkdown(source: string) {
 
 export async function renderMarkdownWithShiki(source: string) {
   try {
-    const highlighter = await getHighlighter()
+    const languages = createMarkdown().parse(source, {}).flatMap((token) => {
+      if (token.type !== 'fence')
+        return []
+      const language = normalizeLanguage(token.info.trim().split(/\s+/, 1)[0])
+      return language ? [language] : []
+    })
+    if (languages.length === 0)
+      return renderMarkdown(source)
+
+    const highlighter = await getHighlighter(languages)
     return render(source, highlighter)
   }
   catch (error) {
