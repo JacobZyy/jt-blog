@@ -19,6 +19,8 @@ The site reads `/content/posts.json`. During development, Vite serves this path 
 
 The committed snapshot contains mock posts, so local development does not require Notion credentials. Site text, projects, GitHub, RSS, and social links live in `apps/blog/src/config/site.ts`. Empty URLs are not rendered.
 
+The homepage shows the latest published month and recent monthly archives. `/posts` groups articles by the calendar month in `publishedAt`; `/posts/month/YYYY-MM` opens that month's complete directory. New snapshots update these pages without a frontend rebuild. `/topics` reserves an entry for future collections and currently shows an empty state.
+
 ## Notion sync
 
 Create the ignored local environment file, restrict its permissions, then set the credentials:

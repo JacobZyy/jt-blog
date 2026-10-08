@@ -13,7 +13,7 @@ export interface Project {
 export const siteConfig = {
   name: 'Jacob Zha',
   eyebrow: 'Frontend engineer · open source',
-  description: 'I build quiet tools, design systems, and open-source software — then write down what survived implementation.',
+  description: '每个月，从聊天记录与真实实践里，\n整理值得分享的内容。',
   year: 2026,
   links: {
     github: { label: 'GitHub', href: '' } satisfies SiteLink,
@@ -23,19 +23,19 @@ export const siteConfig = {
   projects: [
     {
       name: 'jt-cli',
-      description: 'Developer tooling for repeatable local workflows.',
+      description: '把重复的开发流程，交给工具。',
       tech: 'Rust',
       href: '',
     },
     {
       name: 'jt-fe-presets',
-      description: 'Opinionated frontend presets built around Vite+.',
+      description: '围绕 Vite+ 的前端工程预设。',
       tech: 'TypeScript',
       href: '',
     },
     {
       name: 'jt-blog',
-      description: 'A quiet personal blog powered by Notion and Solid.',
+      description: 'Notion 写作，Solid 呈现。',
       tech: 'SolidJS',
       href: '',
     },

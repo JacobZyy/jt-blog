@@ -13,15 +13,14 @@ export function Footer(props: { year: number }) {
           {' '}
           {siteConfig.name}
         </p>
-        <div class="footer-links">
-          <For each={links()}>
-            {link => (
-              <Show when={link.href}>
-                <a class="footer-link focus-ring" href={link.href} target="_blank" rel="noreferrer">{link.label}</a>
-              </Show>
-            )}
-          </For>
-        </div>
+        <p class="footer-note">慢慢做，持续写。</p>
+        <Show when={links().length > 0}>
+          <div class="footer-links">
+            <For each={links()}>
+              {link => <a class="footer-link focus-ring" href={link.href} target="_blank" rel="noreferrer">{link.label}</a>}
+            </For>
+          </div>
+        </Show>
       </div>
     </footer>
   )

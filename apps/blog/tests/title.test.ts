@@ -7,7 +7,11 @@ const posts = [{ slug: 'hello-world', title: 'Hello World' }]
 
 test('maps routes to browser titles', () => {
   assert.equal(routeTitle('/', posts), 'jacob-z')
-  assert.equal(routeTitle('/posts', posts), 'Posts')
+  assert.equal(routeTitle('/posts', posts), '每月博文 · jacob-z')
+  assert.equal(routeTitle('/topics', posts), '专题专栏 · jacob-z')
+  assert.equal(routeTitle('/posts/month/2026-09', posts), '2026年9月 · 每月博文')
+  assert.equal(routeTitle('/posts/month/2026-13', posts), '404')
+  assert.equal(routeTitle('/posts/month/%E0%A4%A', posts), '404')
   assert.equal(routeTitle('/posts/hello-world', posts), 'Hello World')
   assert.equal(routeTitle('/posts/missing', posts, true), 'Post')
   assert.equal(routeTitle('/posts/missing', posts), '404')

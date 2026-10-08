@@ -4,10 +4,13 @@ import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { siteConfig } from './config/site'
 import { loadPosts } from './lib/content'
+import { parseMonthKey } from './lib/months'
 import { postSlug, routeTitle } from './lib/title'
 import { Home } from './pages/Home'
+import { Month } from './pages/Month'
 import { PostDetail } from './pages/PostDetail'
 import { Posts } from './pages/Posts'
+import { Topics } from './pages/Topics'
 
 type Theme = 'light' | 'dark'
 
@@ -29,24 +32,24 @@ function preferredTheme(): Theme {
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function ContentFailure(props: { message: string }) {
+function ContentFailure() {
   return (
-    <section class="content-state" role="alert">
-      <p class="eyebrow">Content unavailable</p>
-      <h1>Posts could not be loaded.</h1>
-      <p>{props.message}</p>
-      <a class="button button-secondary" href="/">Return home</a>
+    <section class="content-state site-container" role="alert">
+      <p class="eyebrow">内容暂不可用</p>
+      <h1>博文暂时无法加载。</h1>
+      <p>请刷新后重试。</p>
+      <a class="button button-secondary" href="/">返回首页</a>
     </section>
   )
 }
 
 function NotFound() {
   return (
-    <section class="content-state">
+    <section class="content-state site-container">
       <p class="eyebrow">404</p>
-      <h1>Page not found.</h1>
-      <p>This path does not belong to the quiet corner of the site.</p>
-      <a class="button button-primary" href="/">Return home</a>
+      <h1>页面不存在。</h1>
+      <p>这个地址暂时没有内容。</p>
+      <a class="button button-primary" href="/">返回首页</a>
     </section>
   )
 }
@@ -114,7 +117,7 @@ function App() {
 
   return (
     <div class="site-shell">
-      <Header theme={theme()} onToggleTheme={toggleTheme} />
+      <Header theme={theme()} activePath={path()} onToggleTheme={toggleTheme} />
       <main class="site-main">
         <Switch fallback={<NotFound />}>
           <Match when={path() === '/'}>
@@ -123,10 +126,33 @@ function App() {
           <Match when={path() === '/posts'}>
             <Posts posts={posts()} loading={loading()} error={contentError()} />
           </Match>
+          <Match when={path() === '/topics'}>
+            <Topics />
+          </Match>
+          <Match when={path().startsWith('/posts/month/')}>
+            <Show
+              when={parseMonthKey(path().slice('/posts/month/'.length))}
+              fallback={<NotFound />}
+            >
+              {month => (
+                <Show
+                  when={!loading()}
+                  fallback={<div class="content-state site-container" role="status"><p>正在加载本月博文…</p></div>}
+                >
+                  <Show
+                    when={!contentError()}
+                    fallback={<ContentFailure />}
+                  >
+                    <Month monthKey={month().key} posts={posts()} />
+                  </Show>
+                </Show>
+              )}
+            </Show>
+          </Match>
           <Match when={path().startsWith('/posts/')}>
             <Show
               when={posts().find(post => post.slug === postSlug(path()))}
-              fallback={loading() ? <div class="content-state"><p>Loading post…</p></div> : contentError() ? <ContentFailure message={contentError()} /> : <NotFound />}
+              fallback={loading() ? <div class="content-state site-container" role="status"><p>正在加载博文…</p></div> : contentError() ? <ContentFailure /> : <NotFound />}
             >
               {post => <PostDetail post={post()} />}
             </Show>
